@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Leave Request</title>
+</head>
+<body>
+    <h1>Leave Request Form</h1>
+
+    <div id="login">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="employeeId">Employee ID:</label>
+            <input type="text" id="employeeId" name="employeeId" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <div id="leaveFormContainer" style="display:none;">
+        <h2>Leave Request Form</h2>
+        <form id="leaveForm">
+            <label for="days">Number of Days:</label>
+            <input type="number" id="days" name="days" required>
+            
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const employeeId = document.getElementById('employeeId').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ employeeId, password })
+            });
+
+            if (response.ok) {
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('leaveFormContainer').style.display = 'block';
+                localStorage.setItem('employeeId', employeeId);
+            } else {
+                alert('Invalid login credentials');
+            }
+        });
+
+        document.getElementById('leaveForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const employeeId = localStorage.getItem('employeeId');
+            const days = document.getElementById('days').value;
+
+            await fetch('/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ employeeId, days })
+            });
+
+            alert("Leave request submitted!");
+        });
+    </script>
+</body>
+</html>
