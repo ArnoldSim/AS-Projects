@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tip of the Day</title>
+    <!-- Font for professional readability --><link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Basic Setup */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            /* UPDATED FONT FAMILY */
+            font-family: 'Roboto', sans-serif; 
+            overflow: hidden; /* Hides scrollbars */
+        }
+
+        /* 1. The Slide Container */
+        .slide-container {
+            width: 100vw; /* 100% of viewport width */
+            height: 100vh; /* 100% of viewport height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            box-sizing: border-box; /* Ensures padding doesn't break layout */
+
+            /* NEW: Background transition for smooth color changes */
+            transition: background 1.5s ease-in-out; 
+            color: #ffffff;
+
+            /* NOTE: The initial background is now set by JS on load */
+        }
+
+        /* NEW: Logo Styling for Top Left Positioning */
+        .top-left-logo {
+            position: absolute;
+            top: 30px; /* Distance from the top */
+            left: 30px; /* Distance from the left */
+            z-index: 10; /* Ensure it stays above the gradient slide */
+            border-radius: 8px; /* Professional look */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+        }
+
+        /* 2. The Content Area */
+        .quote-layout {
+            text-align: center;
+            /* UPDATED: Increased max-width for better screen utilization */
+            max-width: 1400px; /* Increased from 1000px */
+            width: 100%;
+        }
+
+        /* 3. The "Tip of the Day" Title */
+        .slide-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #e0e7ff;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #6366f1;
+            padding-bottom: 20px;
+            display: inline-block;
+        }
+
+        /* 4. The Tip Text (the part that changes) */
+        .tip-content {
+            /* This is the container that fades in and out */
+            transition: opacity 0.75s ease-in-out;
+        }
+
+        .tip-content blockquote {
+            font-size: 64px; /* Large and easy to read from a distance */
+            font-weight: 350; 
+            font-style: normal; /* Removed italics */
+            line-height: 1.4;
+            margin: 0 0 30px 0;
+            min-height: 300px; /* Prevents layout "jump" between short and long tips */
+            
+            /* Adds subtle quote marks */
+            position: relative;
+            padding: 0 40px;
+        }
+        
+        /* 5. The Tip Source/Category */
+        .tip-content cite {
+            font-size: 28px;
+            font-style: normal;
+            font-weight: 700;
+            color: #c7d2fe;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Logo in Top Left: Placeholder used for stability. -->
+    <img src="https://legogroup.sharepoint.com/:i:/r/sites/ConsumerServiceOperations-APAC/BackOffice/Shared%20Documents/L2ST/Tip%20of%20the%20day%20-%20High%20Season/LEGO%20Logo.png" class="top-left-logo" height=100, width=100>
+
+    <!-- This is the main display area --><div class="slide-container" id="slide1">
+        <div class="quote-layout">
+            <!-- UPDATED TITLE TEXT --><h2 class="slide-title">Tips for the Day</h2>
+            
+            <!-- This "tip-content" div is what the script will update --><div id="tip-content" class="tip-content">
+                <blockquote id="tip-text">Loading tips...</blockquote>
+                <cite id="tip-source"></cite>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- 1. TIPS LIST ---
+        const tips = [
+/////////////////////////////////////////////////////////////////////////////
+//                 ADD YOUR TIPS HERE IN THE BELOW FORMAT                  //
+//                   { text: "XXX", source: "YYY" },                       //
+/////////////////////////////////////////////////////////////////////////////
+            { 
+                text: "Take a mindfulness break from time to time to stand up, stretch, and decompress your mind.",
+                source: "Wellness: Posture & Movement"
+            },
+            { 
+                text: "Protect your attention. Keep a small notepad for **'brain dumps'** Pen down unrelated thoughts to refocus on the task.",
+                source: "Wellness: Cognitive Clarity"
+            },
+            { 
+                text: "Our greatest weakness lies in giving up. The most certain way to succeed is always to try just one more time.",
+                source: "Quote: Thomas A. Edison | Persistence Mindset"
+            },
+            { 
+                text: "Reframe complex situations as **opportunities to practice advanced communication skills**.",
+                source: "Growth Mindset"
+            },
+            { 
+                text: "Success is the sum of small efforts, repeated day in and day out.",
+                source: "Quote: Robert Collier | Daily Excellence"
+            },
+            { 
+                text: "When facing a complex interaction, use a brief hold to gather your thoughts, resources, and composure.",
+                source: "Strategic Pause"
+            },
+            { 
+                text: "Protect your ears. Keep your headset volume at a comfortable level to prevent fatigue.",
+                source: "Wellness: Physical Health"
+            },
+            { 
+                text: "Take your full lunch break away from your desk. The change of environment is a tactical mental reset.",
+                source: "Wellness: Decompression"
+            },
+            { 
+                text: "The only way to great performance is to put love in what you do.",
+                source: "Quote: Steve Jobs | Purpose & Motivation"
+            },
+            { 
+                text: "Almost everything will work again if you unplug it for a few minutes... including you.",
+                source: "Quote: Anne Lamott | Strategic Breaks"
+            },
+            { 
+                text: "End your day by noting **one successful interaction** or one positive solution you delivered.",
+                source: "Wellness: Positive Reinforcement"
+            },
+        ];
+
+        // --- 2. SET ROTATION SPEED (in milliseconds) ---
+        const ROTATION_SPEED_MS = 20000; // 20,000 ms = 20 seconds
+        
+        // --- 3. COLOR PALETTE FOR RANDOMIZATION ---
+        const backgroundColors = [
+            // Blue Gradient (Calming/Professional)
+            'linear-gradient(135deg, #0f172a, #1d4ed8, #4f46e5)',
+            // Red/Maroon Gradient (Urgency/Energy)
+            'linear-gradient(135deg, #991b1b, #c52929, #ef4444)',
+            // Gold/Orange Gradient (Focus/Warmth) - Dark enough for white text
+            'linear-gradient(135deg, #a16207, #ca8a04, #facc15)'
+        ];
+
+        // --- 4. THE ROTATOR LOGIC ---
+        (function() {
+            // Get the HTML elements to update
+            const slideContainer = document.getElementById('slide1'); // Get the main container
+            const tipContentElement = document.getElementById('tip-content');
+            const tipTextElement = document.getElementById('tip-text');
+            const tipSourceElement = document.getElementById('tip-source');
+
+            let currentIndex = 0; // Keeps track of which tip is next
+
+            /**
+             * Shuffles array in place using the Fisher-Yates (Knuth) algorithm.
+             */
+            function shuffleArray(a) {
+                let j, x, i;
+                for (i = a.length - 1; i > 0; i--) {
+                    j = Math.floor(Math.random() * (i + 1));
+                    x = a[i];
+                    a[i] = a[j];
+                    a[j] = x;
+                }
+                return a;
+            }
+
+            // Shuffle the tips array immediately when the script runs
+            if (tips.length > 1) {
+                shuffleArray(tips);
+                console.log("Tips array has been successfully shuffled for random display.");
+            }
+
+
+            // Function to display the next tip
+            function showNextTip() {
+                // Check if tips array is empty to prevent errors
+                if (tips.length === 0) {
+                    tipTextElement.textContent = "No tips available to display. Please add tips to the 'tips' array.";
+                    tipSourceElement.textContent = "";
+                    tipContentElement.style.opacity = 1;
+                    clearInterval(rotationInterval); // Stop the rotation
+                    return;
+                }
+
+                // 1. Fade out the current tip
+                tipContentElement.style.opacity = 0;
+
+                // 2. Wait for the fade-out to finish (750ms, matches CSS transition)
+                setTimeout(() => {
+                    // Get the next tip from the now-shuffled array
+                    const tip = tips[currentIndex];
+                    
+                    // NEW FIX: Convert Markdown **text** to HTML <strong>text</strong> and use innerHTML
+                    let formattedText = tip.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    tipTextElement.innerHTML = formattedText;
+                    
+                    // Update the source (still uses textContent for simple string)
+                    tipSourceElement.textContent = `— ${tip.source}`;
+                    
+                    // Randomly select and apply a new background color
+                    const randomColorIndex = Math.floor(Math.random() * backgroundColors.length);
+                    const newBackground = backgroundColors[randomColorIndex];
+                    slideContainer.style.background = newBackground;
+
+                    // 3. Fade the new tip back in
+                    tipContentElement.style.opacity = 1;
+                    
+                    // 4. Move to the next index, looping back to 0 if at the end
+                    currentIndex = (currentIndex + 1) % tips.length;
+
+                }, 750); // Must match the CSS transition time
+            }
+
+            let rotationInterval;
+
+            // Execute the rotation
+            if (tips.length > 0) {
+                // 1. Show the first tip immediately
+                showNextTip(); 
+                
+                // 2. Set an interval to call the showNextTip function
+                rotationInterval = setInterval(showNextTip, ROTATION_SPEED_MS);
+            } else {
+                 tipTextElement.textContent = "No tips available to display.";
+                 tipSourceElement.textContent = "";
+                 tipContentElement.style.opacity = 1;
+            }
+        })();
+    </script>
+
+</body>
+</html>
